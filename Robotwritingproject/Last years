@@ -1,0 +1,493 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+//#include <windows.h>
+//#include "rs232.h"
+//#include "serial.h"
+
+#define bdrate 115200               /* 115200 baud */
+
+void SendCommands (char *buffer );
+
+void DisplayBoard(int GameMatrix[3][3]) {
+    printf("Current Board:\n");
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            printf("%c ", GameMatrix[i][j] == 0 ? '_' : GameMatrix[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void Horizontal_Win(int GameMatrix[3][3], char playerShape, int row, int playernumber) {
+    int True = 1;
+    for (int j = 0; j < 3; j++) {
+        if (GameMatrix[row][j] != playerShape) {
+            True = 0;
+            break;
+        }
+    }
+
+    if (True) {
+        printf("Player %d Wins in row %d\n",playernumber, row + 1);
+         exit(0);
+
+    }
+}
+
+void Vertical_Win(int GameMatrix[3][3], char playerShape, int column,int playernumber) {
+    int True = 1;
+    for (int i = 0; i < 3; i++) {
+        if (GameMatrix[i][column] != playerShape) {
+            True = 0;
+            break;
+        }
+    }
+
+    if (True) {
+        printf("Player %d Wins in column %d\n",playernumber, column + 1);
+         exit(0);
+
+    }
+}
+
+void Diagonal_Win(int GameMatrix[3][3], char playerShape, int playernumber) {
+
+    int Diag1 = 1;
+    for (int i = 0; i < 3; i++) {
+        if (GameMatrix[i][i] != playerShape) {
+            Diag1 = 0;
+            break;
+        }
+    }
+    int Diag2 = 1;
+    for (int i = 0; i < 3; i++) {
+        if (GameMatrix[i][2 - i] != playerShape) {
+            Diag2 = 0;
+            break;
+        }
+    }
+
+    if ( Diag1 ) {
+        printf("Player %d Wins in the positive diagonal \n",playernumber);
+         exit(0);  
+    }
+    if ( Diag2 ){
+        printf("Player %d Wins in the negative diagonal \n",playernumber);
+         exit(0);
+    }
+}
+
+void NumberToShape( char P, int playernumber){
+
+    if ( P == '1') {
+
+        printf("player %d has chosen Sqaure\n", playernumber);
+    }
+    else if ( P == '2'){
+
+        printf("player %d has chosen Triangle\n", playernumber);
+    }
+    else if ( P == '3'){
+
+        printf("Player %d has chosen Star\n", playernumber);
+    }
+    else if (P=='4'){
+
+        printf("Player %d has chosen Right Angle Triangle\n", playernumber);
+
+    }else if (P=='5'){
+
+        printf("Player %d has chosen Cross\n", playernumber);
+
+    }else if (P=='6'){
+
+        printf("Player %d has chosen Diamond\n", playernumber);
+
+    }else {
+
+        printf("Invalid shape choice. Please choose a shape number between 1 and 6.\n");
+        printf("Player %d, choose again: ", playernumber);
+        scanf(" %c", &P);
+    }
+}
+
+void DrawShape (char P, int x , int y, int h){
+    
+    float  T, L, R, B, MX, MY;
+    char buffer [100];
+
+    FILE *file;
+    char filename[] = "shapestroke.txt"; 
+    char ch;
+
+    file = fopen(filename, "r");
+
+    if (file == NULL) {
+        printf("Unable to open the file.\n");
+        return 1;
+    }
+   
+
+    T = (4*y + 1)*(h/12);
+    L = (4*x + 1)*(h/12);
+    B = (4*y + 3)*(h/12);
+    R = (4*x + 3)*(h/12);
+    MY = (4*y + 2)*(h/12);
+    MX = (4*y + 2)*(h/12);
+
+    //Sqaure//
+    if (P == '1') {
+
+        sprintf (buffer, "G1 X0 Y0 F1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G0 X%f Y%f \n",L,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",R,T);
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",R,B);
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",L,B);
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",L,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+
+    }
+    //Triangle//
+    if (P == '2') {
+
+        sprintf (buffer, "G1 X0 Y0 F1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G0 X%f Y%f \n",L,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",R,T);
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",MX,B);
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",L,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+    }
+    //Star//
+    if (P == '3'){
+
+        sprintf (buffer, "G1 X0 Y0 F1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G0 X%f Y%f \n",L,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",R,B);
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G0 X%f Y%f \n",L,B);
+        SendCommands(buffer);
+        sprintf (buffer, "S1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",R,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+
+        sprintf (buffer, "G0 X%f Y%f \n",MX,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",MX,B);
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G0 X%f Y%f \n",L,MY);
+        SendCommands(buffer);
+        sprintf (buffer, "S1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",R,MY);
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+
+    }
+    //Right Angle Triangle//
+    if (P == '4'){
+
+        sprintf (buffer, "G1 X0 Y0 F1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G0 X%f Y%f \n",L,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",R,B);
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",L,B);
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",L,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+
+    }
+    //Cross//
+    if (P == '5'){
+
+        sprintf (buffer, "G1 X0 Y0 F1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G0 X%f Y%f \n",L,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",R,B);
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G0 X%f Y%f \n",L,B);
+        SendCommands(buffer);
+        sprintf (buffer, "S1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",R,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+
+
+    }
+    //Diamond//
+    if (P == '6') {
+
+        sprintf (buffer, "G1 X0 Y0 F1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G0 X%f Y%f \n",MX,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S1000\n");
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",R,MY);
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",MX,B);
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",L,MY);
+        SendCommands(buffer);
+        sprintf (buffer, "G1 X%f Y%f \n",MX,T);
+        SendCommands(buffer);
+        sprintf (buffer, "S0\n");
+        SendCommands(buffer);
+
+    }
+
+    fclose(file);
+
+}
+
+int Occupied(int GameMatrix[3][3], int x, int y) {
+
+    return GameMatrix[x][y] != 0;
+}
+
+int main()
+{
+    char buffer[100];
+ 
+    // If we cannot open the port then give up immediatly
+    if ( CanRS232PortBeOpened() == -1 )
+    {
+        printf ("\nUnable to open the COM port (specified in serial.h) ");
+        exit (0);
+    }
+
+    // Time to wake up the robot
+    printf ("\nAbout to wake up the robot\n");
+
+    // We do this by sending a new-line
+    sprintf (buffer, "\n");
+    // printf ("Buffer to send: %s", buffer); // For diagnostic purposes only, normally comment out
+    PrintBuffer (&buffer[0]);
+    Sleep(100);
+
+    // This is a special case - we wait  until we see a dollar ($)
+    WaitForDollar();
+
+    printf ("\nThe robot is now ready to draw\n");
+
+    //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
+    sprintf (buffer, "G1 X0 Y0 F1000\n");
+    SendCommands(buffer);
+    sprintf (buffer, "M3\n");
+    SendCommands(buffer);
+    sprintf (buffer, "S0\n");
+    SendCommands(buffer);
+
+    int GameMatrix[3][3] = {0};
+    char P1,P2;
+    int h; 
+    float A, C;
+
+    printf("Enter Grid Size ( 30 - 100 ) \n");
+    scanf("%d", &h);
+    
+    if (h > 100) {
+        h = 100;
+    } else if (h < 30) {
+        h = 30;
+    }
+    
+    printf("Your Grid is %d by %d\n", h,h);
+
+
+    A = (h/3);
+    C = (2*h/3);
+ 
+    sprintf (buffer, "G1 X0 Y0 F1000\n");
+    SendCommands(buffer);
+    sprintf (buffer, "M3\n");
+    SendCommands(buffer);
+    sprintf (buffer, "S0\n");
+    SendCommands(buffer);
+    sprintf (buffer, "G0 X%f Y0\n",A);
+    SendCommands(buffer);
+    sprintf (buffer, " S1000;");
+    SendCommands(buffer);
+    sprintf (buffer, "G1 X%f Y%d \n",A,h);
+    SendCommands(buffer);
+    sprintf(buffer,"S0\n");
+    SendCommands(buffer);
+    sprintf(buffer,"G0 X%d Y0\n",C);
+    SendCommands(buffer);
+    sprintf(buffer,"S1000\n");
+    SendCommands(buffer);
+    sprintf(buffer,"G1 X%f Y%d \n",C,h);
+    SendCommands(buffer);
+    sprintf(buffer,"S0\n");
+    SendCommands(buffer);
+    sprintf(buffer,"G0 X0 Y%f\n",A);
+    SendCommands(buffer);
+    sprintf(buffer,"S1000\n");
+    SendCommands(buffer);
+    sprintf(buffer,"G1 X%d Y%f \n",h,A);
+    SendCommands(buffer);
+    sprintf(buffer,"S0\n");
+    SendCommands(buffer);
+    sprintf(buffer,"G0 X0 Y%f \n",C);
+    SendCommands(buffer);
+    sprintf(buffer,"S1000\n");
+    SendCommands(buffer);
+    sprintf(buffer,"G1 X%d Y%f \n",h,C);
+    SendCommands(buffer);
+    sprintf(buffer,"S0\n");
+    SendCommands(buffer);
+    sprintf(buffer,"G0 X0 Y0\n"); 
+
+    
+    do {
+        printf("Player 1 choose shape : ");
+        scanf(" %c", &P1);
+
+        if (P1 < '1' || P1 > '6') {
+            printf("Invalid input. Please enter a number between 1 and 6.\n");
+        }
+    } while (P1 < '1' || P1 > '6');
+
+    NumberToShape(P1, 1);
+
+    do {
+    printf("Player 2 choose shape: ");
+    scanf(" %c", &P2);
+
+    if (P2 < '1' || P2 > '6' || P2 == P1) {
+        printf("Invalid input. Please enter a number between 1 and 6 that is not %c\n",P1);
+    }
+    } while (P2 < '1' || P2 > '6' || P2 == P1);
+
+    NumberToShape ( P2, 2);
+
+
+    int n = 0;
+    int x, y;
+    printf(" The Game has Begun\n");
+
+    for (n = 0; n < 4; n++) {
+        do{
+        printf("Player 1 enter coordinates for your move (0-2,0-2)\n");
+        scanf("%d,%d", &x, &y);
+
+        if (x >= 0 && x < 3 && y >= 0 && y < 3 && !Occupied(GameMatrix, x, y)) {
+            GameMatrix[x][y] = P1;
+
+            DisplayBoard(GameMatrix);
+
+            Horizontal_Win(GameMatrix, P1, 0,1);
+            Horizontal_Win(GameMatrix, P1, 1,1);
+            Horizontal_Win(GameMatrix, P1, 2,1);
+            Vertical_Win(GameMatrix,P1,0,1);
+            Vertical_Win(GameMatrix,P1,1,1);
+            Vertical_Win(GameMatrix,P1,2,1);
+            Diagonal_Win(GameMatrix,P1,1);
+
+        } else {
+            printf("Invalid coordinates. Please enter coordinates within the range (0-2, 0-2).\n");
+        }
+     } while (!(x >= 0 && x < 3 && y >= 0 && y < 3));
+        do {
+        printf("Player 2 enter coordinates for your move (0-2,0-2)\n");
+        scanf("%d,%d", &x, &y);
+
+        if (x >= 0 && x < 3 && y >= 0 && y < 3 && !Occupied(GameMatrix, x, y)) {
+            GameMatrix[x][y] = P2;
+
+            DisplayBoard(GameMatrix);
+            
+            Horizontal_Win(GameMatrix, P2, 0,2);
+            Horizontal_Win(GameMatrix, P2, 1,2);
+            Horizontal_Win(GameMatrix, P2, 2,2);
+            Vertical_Win(GameMatrix,P2,0,2);
+            Vertical_Win(GameMatrix,P2,1,2);
+            Vertical_Win(GameMatrix,P2,2,2);
+            Diagonal_Win(GameMatrix,P2,2);
+
+        } else {
+            printf("Invalid coordinates. Please enter coordinates within the range (0-2, 0-2).\n");
+        }
+    } while (!(x >= 0 && x < 3 && y >= 0 && y < 3));
+
+
+        
+    }
+
+    printf(" Game is a Draw\n");
+
+    
+
+    // Before we exit the program we need to close the COM port
+    CloseRS232Port();
+    printf("Com port now closed\n");
+
+    return (0);
+}
+
+// Send the data to the robot - note in 'PC' mode you need to hit space twice
+// as the dummy 'WaitForReply' has a getch() within the function.
+void SendCommands (char *buffer )
+{
+    // printf ("Buffer to send: %s", buffer); // For diagnostic purposes only, normally comment out
+    PrintBuffer (&buffer[0]);
+    WaitForReply();
+    Sleep(100); // Can omit this when using the writing robot but has minimal effect
+}
